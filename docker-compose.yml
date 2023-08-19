@@ -1,0 +1,61 @@
+version: "3"
+services:
+  kafka1:
+    image: bitnami/kafka
+    container_name: kafka1
+    ports:
+      - 9091:9091
+      - 2181:2181
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9091,CONTROLLER://:2181
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka1:9091
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:2181,2@kafka2:2182
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_KRAFT_CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
+  kafka2:
+    image: bitnami/kafka
+    container_name: kafka2
+    ports:
+      - 9092:9092
+      - 2182:2182
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:2182
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka2:9092
+      - KAFKA_BROKER_ID=2
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:2181,2@kafka2:2182
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_NODE_ID=2
+      - KAFKA_KRAFT_CLUSTER_ID=MkU3OEVBNTcwNTJENDM2Qk
+  mongo:
+    image: mongo
+    container_name: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo:/data/db
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    ports:
+      - 8081:8081
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=password'
+    depends_on:
+      - mongo
+  python:
+    build: ./python
+    volumes:
+      - ./python:/app
